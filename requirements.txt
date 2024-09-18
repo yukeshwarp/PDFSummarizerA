@@ -1,6 +1,5 @@
-streamlit==1.25.0  # or the latest stable version
-langchain==0.0.278  # Ensure it's the version compatible with AzureChatOpenAI
+streamlit==1.25.0
+langchain==0.0.278
 openai==0.27.8
 python-dotenv==1.0.0
-PyMuPDF==1.22.5  # for `fitz`
-concurrent.futures  # This may already be part of the standard library, so no need to explicitly install it
+PyMuPDF==1.22.5
