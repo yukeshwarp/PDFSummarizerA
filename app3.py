@@ -4,21 +4,22 @@ from langchain.prompts import PromptTemplate
 import fitz
 import os
 from dotenv import load_dotenv
-from concurrent.futures import ThreadPoolExecutor
+from io import BytesIO
+import docx  # To create a .docx file
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Now retrieve the environment variables
-
 openai_api_key = os.getenv("OPENAI_API_KEY")
 openai_api_base = os.getenv("AZURE_OPENAI_API_ENDPOINT")
 openai_api_version = os.getenv("OPENAI_API_VERSION")
-
+model_name = os.getenv("MODEL_NAME")
+deployment_name = os.getenv("DEPLOYMENT_NAME")
 # Initialize AzureChatOpenAI LLM
 llm = AzureChatOpenAI(
-    deployment_name="gpt-4o-mini",
-    model_name="gpt-4o-mini"
+    deployment_name=deployment_name,
+    model_name=model_name
 )
 
 # Streamlit frontend
@@ -81,9 +82,11 @@ if uploaded_file is not None:
         chunk_summary = llm.predict(formatted_summary_prompt)
         return chunk_summary
 
-    # Use ThreadPoolExecutor to process chunks in parallel
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        chunk_summaries = list(executor.map(process_chunk, chunks))
+    # Process chunks sequentially instead of in parallel
+    chunk_summaries = []
+    for chunk in chunks:
+        chunk_summary = process_chunk(chunk)
+        chunk_summaries.append(chunk_summary)
 
     # Generate a final summary based on all chunk summaries
     st.subheader("Final Summary of the Document")
@@ -109,3 +112,31 @@ if uploaded_file is not None:
 
     st.write(f"Estimated read time: {estimated_read_time:.2f} minutes")
     st.write(final_summary)
+
+    # Functionality to download summary as a .txt file
+    def download_txt(summary):
+        return BytesIO(summary.encode('utf-8'))
+
+    # Functionality to download summary as a .docx file
+    def download_docx(summary):
+        doc = docx.Document()
+        doc.add_paragraph(summary)
+        output = BytesIO()
+        doc.save(output)
+        output.seek(0)
+        return output
+
+    # Download buttons for .txt and .docx formats
+    st.download_button(
+        label="Download Summary as .txt",
+        data=download_txt(final_summary),
+        file_name="summary.txt",
+        mime="text/plain"
+    )
+
+    st.download_button(
+        label="Download Summary as .docx",
+        data=download_docx(final_summary),
+        file_name="summary.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
