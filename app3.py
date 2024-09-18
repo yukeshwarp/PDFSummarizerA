@@ -12,7 +12,7 @@ load_dotenv()
 # Now retrieve the environment variables
 api_type = os.getenv("OPENAI_API_TYPE")
 api_key = os.getenv("OPENAI_API_KEY")
-api_base = os.getenv("OPENAI_API_ENDPOINT")
+api_base = os.getenv("AZURE_OPENAI_API_ENDPOINT")
 api_version = os.getenv("OPENAI_API_VERSION")
 
 # Initialize AzureChatOpenAI LLM
