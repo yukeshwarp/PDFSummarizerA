@@ -24,7 +24,7 @@ llm = AzureChatOpenAI(
 )
 
 # Streamlit frontend
-st.title("PDF Summarizer with Metadata Extraction")
+st.title("PDF Summarizer with Metadata Extraction using Recursive chunking")
 
 # Upload the PDF
 uploaded_file = st.file_uploader("Upload a PDF", type="pdf")
