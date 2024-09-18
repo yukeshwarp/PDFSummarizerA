@@ -1,5 +1,5 @@
 import streamlit as st
-from langchain_openai import AzureChatOpenAI
+from langchain.chat_models import AzureChatOpenAI
 from langchain.prompts import PromptTemplate
 import fitz
 import os
