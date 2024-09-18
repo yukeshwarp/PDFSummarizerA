@@ -4,7 +4,8 @@ from langchain.prompts import PromptTemplate
 import fitz
 import os
 from dotenv import load_dotenv
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 
 # Load environment variables from .env file
 load_dotenv()
