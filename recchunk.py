@@ -6,7 +6,6 @@ import os
 from dotenv import load_dotenv
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-
 # Load environment variables from .env file
 load_dotenv()
 
@@ -95,3 +94,11 @@ if uploaded_file is not None:
 
     st.write(f"Estimated read time: {estimated_read_time:.2f} minutes")
     st.write(final_summary)
+
+    # Provide functionality to download the final summary as a text file
+    st.download_button(
+        label="Download Summary as Text File",
+        data=final_summary,  # The text content
+        file_name="summary.txt",  # The name of the file to be downloaded
+        mime="text/plain"  # File type
+    )
