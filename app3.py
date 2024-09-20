@@ -16,6 +16,7 @@ openai_api_base = os.getenv("AZURE_OPENAI_API_ENDPOINT")
 openai_api_version = os.getenv("OPENAI_API_VERSION")
 model_name = os.getenv("MODEL_NAME")
 deployment_name = os.getenv("DEPLOYMENT_NAME")
+
 # Initialize AzureChatOpenAI LLM
 llm = AzureChatOpenAI(
     deployment_name=deployment_name,
@@ -35,13 +36,20 @@ if uploaded_file is not None:
     # Load PDF from the file bytes
     pdf = fitz.open(stream=file_data, filetype="pdf")
     full_text = ""
+    total_pages = len(pdf)  # Get the total number of pages in the PDF
 
     # Extract text from each page of the PDF
-    for page_num in range(len(pdf)):
+    for page_num in range(total_pages):
         page = pdf.load_page(page_num)  # Load the current page
         full_text += page.get_text("text")  # Append text from each page
 
     pdf.close()
+
+    # Target number of summary pages as 1/8th of the total PDF pages
+    target_summary_pages = max(1, total_pages // 8)
+    # Average number of words per page in the summary (assuming ~300 words per page)
+    words_per_summary_page = 300
+    target_summary_words = target_summary_pages * words_per_summary_page
 
     # Split the PDF content into chunks with overlapping (chunk_size=4000, overlap_size=500)
     def chunk_text(full_text, chunk_size=5000, overlap_size=500):
@@ -70,7 +78,7 @@ if uploaded_file is not None:
 
     # Template for summarization
     summary_prompt_template = """
-    Extract metadata from the chunk and summarize the chunk based on the metadata. The chunk text is given below:
+    Extract summary and metadata from the chunk given below:
     {chunk}
     """
 
@@ -95,10 +103,12 @@ if uploaded_file is not None:
     You are an expert in summarization. Here is the summary of individual chunks of the document to be summarized:
     {chunk_summaries}
     Give a complete and comprehensive summary of the document by using chunk summaries.
+    Make sure that the total number of words in the summary does not exceed {target_summary_words} words.
     """
-    
+
     final_summary_prompt = final_summary_prompt_template.format(
-        chunk_summaries="\n".join(chunk_summaries)
+        chunk_summaries="\n".join(chunk_summaries),
+        target_summary_words=target_summary_words
     )
 
     # Get the final document summary from the LLM
